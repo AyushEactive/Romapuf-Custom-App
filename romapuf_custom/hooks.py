@@ -253,6 +253,23 @@ process_soa_html = {
         "romapuf_custom/templates/process_statement_of_accounts_accounts_receivable.html"
     ]
 }
+
+fixtures = [
+    {
+		"dt": "Custom Field",
+		"filters": [
+			[
+				"fieldname",
+    			"in",
+       				(
+						"custom_allow_notification",
+						"custom_notification"
+						
+					)
+			]
+		]
+	}
+]
 # # Monkey Patching
 # custom_get_html = "romapuf_custom.override.process_statement_of_accounts.get_html"
 # ori_get_html = "erpnext.account.doctype.process_statement_of_accounts.process_statement_of_accounts.get_html"
