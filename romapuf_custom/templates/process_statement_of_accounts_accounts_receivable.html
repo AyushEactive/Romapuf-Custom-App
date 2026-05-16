@@ -1,0 +1,170 @@
+<style>
+	.print-format {
+		padding: 4mm;
+		font-size: 8.0pt !important;
+	}
+	.print-format td {
+		vertical-align:middle !important;
+	}
+</style>
+
+<div>
+	<div style="display: flex; width: 100%; margin-bottom: 10px;">
+		<!-- Left: Logo -->
+		<div style="width: 35%;">
+			<img src="/files/Logo Karman & Beyond.svg" alt="Company Logo" style="max-width: 100%; height: auto;">
+		</div>
+
+		<!-- Middle Spacer -->
+		<div style="width: 30%;"></div>
+
+		<!-- Right: Invoice Info -->
+		<div style="width: 45%; text-align: right; color: #000;">
+			<p style="font-weight:800; line-height: 1;">
+				<span style="font-size: 42px;">Account</span><br><span style="font-size: 62px; font-weight: 900;">Receivable</span>
+			</p>
+		</div>
+	</div>
+		
+	<!-- Second row -->
+	{% if frappe.utils.today() <= "2026-12-31" %}
+        <p style="font-size: 16px; width: 100%; margin-top: 5px;">
+            <b>Previously Madhav PE Foam Pvt Ltd</b>
+        </p>
+	{% endif %}
+
+	<h4 class="text-center">
+		{{ filters.get("customer_name") or filters["customer_name"] }}
+	</h4>
+	<h5 class="text-center">
+		Due Date
+		{{ _("Until") }}
+		{{ frappe.format(filters.report_date, 'Date') }}
+	</h5>
+
+	<table class="table table-bordered">
+		<thead>
+			<tr>
+				{% if(report.report_name == "Accounts Receivable" or report.report_name == "Accounts Payable") %}
+					<th class="text-center" >{{ _("Date") }}</th>
+					<th class="text-center" >{{ _("Reference") }}</th>
+					<th class="text-center" >{{ _("Due Date") }}</th>
+					<th class="text-center" >{{ _("Age (Days)") }}</th>
+					<th class="text-center" >{{ _("Invoiced Amount") }}</th>
+					<th class="text-center" >{{ _("Paid Amount") }}</th>
+					<th class="text-center" >{{ _("Credit Note") }}</th>
+					<th class="text-center" >{{ _("Outstanding Amount") }}</th>
+                    <th class="text-center" >{{ _("Total Outstanding") }}</th>
+				{% endif %}
+			</tr>
+		</thead>
+		<tbody>
+            {% set ns = namespace(total_outstanding=0) %}
+
+            {% for i in range(data|length) %}
+            <tr>
+                {% if(report.report_name == "Accounts Receivable" or report.report_name == "Accounts Payable") %}
+                    {% if(data[i]["party"]) %}
+
+                        <!-- Date -->
+                        <td>{{ frappe.format(data[i]["posting_date"], 'Date') }}</td>
+
+                        <!-- Reference -->
+                        <td>
+                            {{ data[i]["voucher_type"] }}<br>
+                            {{ data[i]["voucher_no"] }}
+                        </td>
+
+                        <!-- Due Date (same as posting_date for now) -->
+                        <td>{{ frappe.format(data[i]["due_date"], 'Date') }}</td>
+
+                        <!-- Age -->
+                        <td style="text-align: right">{{ data[i]["age"] }}</td>
+
+                        <!-- Invoiced -->
+                        <td style="text-align: right">
+                            {{ frappe.utils.fmt_money(data[i]["invoiced"], currency=data[i]["currency"]) }}
+                        </td>
+
+                        {% if not(filters.show_future_payments) %}
+                        <!-- Paid -->
+                        <td style="text-align: right">
+                            {{ frappe.utils.fmt_money(data[i]["paid"], currency=data[i]["currency"]) }}
+                        </td>
+
+                        <!-- Credit Note -->
+                        <td style="text-align: right">
+                            {{ frappe.utils.fmt_money(data[i]["credit_note"], currency=data[i]["currency"]) }}
+                        </td>
+                        {% endif %}
+
+                        <!-- Outstanding -->
+                        <td style="text-align: right">
+                            {{ frappe.utils.fmt_money(data[i]["outstanding"], currency=data[i]["currency"]) }}
+                        </td>
+
+                        {% set ns.total_outstanding = ns.total_outstanding + (data[i]["outstanding"] or 0) %}
+                        <!-- Total Outstanding -->
+                        <td style="text-align: right">
+                            {{ frappe.utils.fmt_money(ns.total_outstanding, currency=data[i]["currency"]) }}
+                        </td>
+
+                    {% else %}
+
+                        <!-- Empty columns before Total -->
+                        <td></td>
+                        <td></td>
+                        <td></td>
+
+                        <!-- Total label -->
+                        <td style="text-align: right"></td>
+
+                        <!-- Totals -->
+                        <td style="text-align: right">
+                            {{ frappe.utils.fmt_money(data[i]["invoiced"], data[i]["currency"]) }}
+                        </td>
+
+                        {% if not(filters.show_future_payments) %}
+                        <td style="text-align: right">
+                            {{ frappe.utils.fmt_money(data[i]["paid"], currency=data[i]["currency"]) }}
+                        </td>
+                        <td style="text-align: right">
+                            {{ frappe.utils.fmt_money(data[i]["credit_note"], currency=data[i]["currency"]) }}
+                        </td>
+                        {% endif %}
+
+                        <td style="text-align: right">
+                            {{ frappe.utils.fmt_money(data[i]["outstanding"], currency=data[i]["currency"]) }}
+                        </td>
+
+                        <td></td>
+                    {% endif %}
+                {% endif %}
+            </tr>
+            {% endfor %}
+
+            <!-- Grand Total Row -->
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td><b>{{ _("Total") }}</b></td>
+                <td style="text-align: right"><b>{{ frappe.utils.fmt_money(data|sum(attribute="invoiced"), currency=data[0]["currency"]) }}</b></td>
+                <td style="text-align: right"><b>{{ frappe.utils.fmt_money(data|sum(attribute="paid"), currency=data[0]["currency"]) }}</b></td>
+                <td style="text-align: right"><b>{{ frappe.utils.fmt_money(data|sum(attribute="credit_note"), currency=data[0]["currency"]) }}</b></td>
+                <td style="text-align: right"><b>{{ frappe.utils.fmt_money(data|sum(attribute="outstanding"), currency=data[0]["currency"]) }}</b></td>
+                <td></td>
+            </tr>
+
+        </tbody>
+	</table>
+	<br>
+	
+    <p class="text-right text-muted">{{ _("Printed On ") }}{{ frappe.utils.now() }}</p>
+
+    <div class="text-center">
+        <img src="/files/Logo.png" alt="ROMAPUF" width="300px;" height="40px">
+        <p style="font-size: 10px;">For any further assistance please call us at 7404441163!<br>accounts@romapuf.com 8510009505</p>
+        <hr style="border-width:0;color:black;background-color:black;padding-bottom:2px;">
+    </div>
+</div>

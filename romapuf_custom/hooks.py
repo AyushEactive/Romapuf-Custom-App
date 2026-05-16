@@ -26,7 +26,9 @@ app_license = "mit"
 
 # include js, css files in header of desk.html
 # app_include_css = "/assets/romapuf_custom/css/romapuf_custom.css"
-# app_include_js = "/assets/romapuf_custom/js/romapuf_custom.js"
+# app_include_js = [
+    # "/assets/romapuf_custom/js/romapuf_custom.js"
+# ]
 
 # include js, css files in header of web template
 # web_include_css = "/assets/romapuf_custom/css/romapuf_custom.css"
@@ -148,13 +150,13 @@ app_license = "mit"
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
+scheduler_events = {
 # 	"all": [
 # 		"romapuf_custom.tasks.all"
 # 	],
-# 	"daily": [
-# 		"romapuf_custom.tasks.daily"
-# 	],
+	"daily": [
+		"romapuf_custom.api.statement_scheduler.run_statement_scheduler"
+	],
 # 	"hourly": [
 # 		"romapuf_custom.tasks.hourly"
 # 	],
@@ -164,7 +166,7 @@ app_license = "mit"
 # 	"monthly": [
 # 		"romapuf_custom.tasks.monthly"
 # 	],
-# }
+}
 
 # Testing
 # -------
@@ -242,3 +244,16 @@ app_license = "mit"
 # 	"Logging DocType Name": 30  # days to retain logs
 # }
 
+
+process_soa_html = {
+    "General Ledger": [
+        "romapuf_custom/templates/process_statement_of_accounts.html"
+    ],
+    "Accounts Receivable": [
+        "romapuf_custom/templates/process_statement_of_accounts_accounts_receivable.html"
+    ]
+}
+# # Monkey Patching
+# custom_get_html = "romapuf_custom.override.process_statement_of_accounts.get_html"
+# ori_get_html = "erpnext.account.doctype.process_statement_of_accounts.process_statement_of_accounts.get_html"
+# ori_get_html = custom_get_html

@@ -1,0 +1,113 @@
+<style>
+	.statement-body tr td {
+		font-size: 14px;
+	}
+	.statement-body > thead th {
+		background: #333 !important;
+		color: #fff !important;
+		text-align: center;
+	}
+
+</style>
+
+<div class="page-break">
+	<div style="display: flex; width: 100%; margin-bottom: 10px;">
+		<!-- Left: Logo -->
+		<div style="width: 35%;">
+			<img src="/files/Logo Karman & Beyond.svg" alt="Company Logo" style="max-width: 100%; height: auto;">
+		</div>
+
+		<!-- Middle Spacer -->
+		<div style="width: 30%;"></div>
+
+		<!-- Right: Invoice Info -->
+		<div style="width: 45%; text-align: right; color: #000;">
+			<p style="font-weight:800; line-height: 1;">
+				<span style="font-size: 42px;">Account</span><br><span style="font-size: 62px; font-weight: 900;">Statement</span>
+			</p>
+		</div>
+	</div>
+		
+	<!-- Second row -->
+	{% if frappe.utils.today() <= "2026-12-31" %}
+	<p style="font-size: 16px; width: 100%; margin-top: 5px;">
+		<b>Previously Madhav PE Foam Pvt Ltd</b>
+	</p>
+	{% endif %}
+
+	{% set party = filters.party | first %}
+	{% set party_name = filters.party_name | first %}
+
+	<div>
+		{% if party == party_name %}
+			<h5 style="text-align: center; font-size: 20px; font-weight: 800;"><b>{{ party_name }}</b></h5>
+		{% else %}
+		<h5 style="text-align: center; font-size: 20px; font-weight: 800;">{{ party }}</h5>
+		{% endif %}
+		<h5 style="text-align: center; font-size: 18px;">
+			{{ frappe.format(filters.from_date, {'fieldtype': 'Date', 'format': 'dd-MMM-yyyy'})}}
+			{{ _("to") }}
+			{{ frappe.format(filters.to_date, {'fieldtype': 'Date', 'format': 'dd-MMM-yyyy'})}}
+			</h5>
+	</div>
+	<br>
+
+	<table class="table table-bordered statement-body">
+		<thead>
+			<tr>
+				<th style="width: 18%">{{ _("Date") }}</th>
+				<th style="width: 22%">{{ _("Reference") }}</th>
+				<!-- <th style="width: 25%">{{ _("Remarks") }}</th> -->
+				<th style="width: 20%">{{ _("Debit") }}</th>
+				<th style="width: 20%">{{ _("Credit") }}</th>
+				<th style="width: 20%">{{ _("Balance (Dr - Cr)") }}</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for row in data %}
+				{% if row.account != "Total" %}
+					<tr>
+						{% if(row.posting_date) %}
+							<td>{{ frappe.format(row.posting_date, 'Date') }}</td>
+							<td>{{ row.voucher_type }}
+								<br>{{ row.voucher_no }}</td>
+							<!-- <td>
+								{% if not (filters.party or filters.account)  %}
+									{{ row.party or row.account }}
+									<br>
+								{% endif %}
+
+								<br>{{ _("Remarks") }}: {{ row.remarks }}
+								{% if row.bill_no %}
+									<br>{{ _("Supplier Invoice No") }}: {{ row.bill_no }}
+								{% endif %}
+							</td> -->
+							<td style="text-align: right">{{ frappe.utils.fmt_money(row.debit, currency=filters.presentation_currency) }}</td>
+							<td style="text-align: right">{{ frappe.utils.fmt_money(row.credit, currency=filters.presentation_currency) }}</td>
+						{% else %}
+							<td></td>
+							<!-- <td></td> -->
+							<td><b>{{ frappe.format(row.account, {fieldtype: "Link"}) or "&nbsp;" }}</b></td>
+							<td style="text-align: right">
+								{{ row.get('account', '') and frappe.utils.fmt_money(row.debit, currency=filters.presentation_currency) }}
+							</td>
+							<td style="text-align: right">
+								{{ row.get('account', '') and frappe.utils.fmt_money(row.credit, currency=filters.presentation_currency) }}
+							</td>
+						{% endif %}
+						<td style="text-align: right">
+							{{ frappe.utils.fmt_money(row.balance, currency=filters.presentation_currency) }}
+						</td>
+					</tr>
+				{% endif %}
+			{% endfor %}
+		</tbody>
+	</table>
+	<br>
+
+	<div style="margin-top: 1em; page-break-inside: avoid; text-align: center;">
+		<div><img src="/files/Logo.png" alt="ROMAPUF" width="300px;" height="40px"></div>
+    	<p style="font-size: 10px;">For any further assistance please call us at 7404441163!<br>accounts@romapuf.com 8510009505</p>
+		<hr style="border-width:0;color:black;background-color:black;padding-bottom:2px;">
+	</div>
+</div>
